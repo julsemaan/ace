@@ -1,3 +1,6 @@
+#!/bin/bash
+set -e
+
 pause() {
     while true; do
         read -p "$1 " yn
@@ -9,16 +12,26 @@ pause() {
     done
 }
 
-read -p "enter version number for the build " VERSION_NUM
+
 
 cd `dirname $0`/..
 SOURCE=`pwd`
+
+git checkout refs/remotes/origin/master -- package.json
+
+CUR_VERSION=`node -e 'console.log(require("./package.json").version)'`
+git --no-pager log --first-parent --oneline v$CUR_VERSION..master
+echo "current version is $CUR_VERSION"
+VERSION_NUM=;
+until [[ "$VERSION_NUM" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] ; do
+    read -p "enter version number for the build " VERSION_NUM
+done
 
 node -e "
     var fs = require('fs');
     var version = '$VERSION_NUM';
     function replaceVersion(str) {
-        return str.replace(/(['\"]?version['\"]?\s*[:=]\s*['\"])[\\d.\\w\\-](['\"])/, function(_, m1, m2) {
+        return str.replace(/(['\"]?version['\"]?\s*[:=]\s*['\"])[\\d.\\w\\-]+(['\"])/, function(_, m1, m2) {
             return m1 + version + m2;
         });
     }
@@ -29,14 +42,14 @@ node -e "
     }
     update('package.json');
     update('build/package.json');
-    update('./lib/ace/ext/menu_tools/generate_settings_menu.js');
+    update('./lib/ace/ace.js');
     update('ChangeLog.txt', function(str) {
         var date='"`date +%Y.%m.%d`"';
         return date + ' Version ' + version + '\n' + str.replace(/^\d+.*/, '').replace(/^\n/, '');
     });
 "
 
-
+pause "versions updated. do you want to start build script? [y/n]"
 
 node Makefile.dryice.js full
 cd build
@@ -59,6 +72,7 @@ echo "build repository updated"
 pause "continue update ace repo? [y/n]"
 cd ..
 
+git commit -a -m "release v$VERSION_NUM"
 
 echo "new commit added"
 pause "continue creating the tag for v$VERSION_NUM [y/n]"
@@ -68,7 +82,7 @@ fi
 
 pause "continue pushing to github? [y/n]"
 
-echo git push --progress --tags "origin" HEAD:gh-pages HEAD:master
+git push --progress --tags "origin" HEAD:gh-pages HEAD:master
 echo "All done!"
 pause "May I go now? [y/n]"
 

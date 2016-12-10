@@ -34,6 +34,7 @@ clean:
 	rm -rf build
 	rm -rf ace-*
 	rm -f ace-*.tgz
+	rm -fr afn-dist
 
 ace.tgz: build
 	mv build ace-`./version.js`/
@@ -42,3 +43,6 @@ ace.tgz: build
 	tar cvfz ace-`./version.js`.tgz ace-`./version.js`/
 
 dist: clean build ace.tgz
+
+afn-dist: build
+	mv build/src-min afn-dist

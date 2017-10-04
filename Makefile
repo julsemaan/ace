@@ -45,4 +45,5 @@ ace.tgz: build
 dist: clean build ace.tgz
 
 afn-dist: build
+	rm -fr afn-dist
 	mv build/src-min afn-dist

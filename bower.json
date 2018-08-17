@@ -1,0 +1,17 @@
+{
+  "name": "ace-anyfile-notepad",
+  "description": "Ace.js library for Anyfile Notepad",
+  "main": "lib/ace",
+  "authors": [
+    "Julien Semaan <julien@semaan.ca>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/julsemaan/ace",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
